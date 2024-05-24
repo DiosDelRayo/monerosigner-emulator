@@ -1,0 +1,11 @@
+dataclasses==0.6
+embit==0.7.0
+numpy==1.26.4
+opencv-python==4.9.0.80
+Pillow==9.4.0
+pypng==0.20220715.0
+qrcode==7.4.2
+tk==0.1.0
+typing_extensions==4.12.0
+pyzbar @ git+https://github.com/seedsigner/pyzbar.git@c3c237821c6a20b17953efe59b90df0b514a1c03
+urtypes @ git+https://github.com/selfcustody/urtypes.git@7fb280eab3b3563dfc57d2733b0bf5cbc0a96a6a
