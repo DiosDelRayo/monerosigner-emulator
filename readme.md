@@ -1,7 +1,7 @@
 # MoneroSigner Emulator (fork of [SeedSigner Emulator](https://github.com/enteropositivo/seedsigner-emulator)
 > Allows to execute [MoneroSigner](https://github.com/DiosDelRayo/MoneroSigner) air-gapped hardware wallet in your desktop (windows/linux/mac)
 
-![](img/ubuntu.png)
+![Emulator window](img/screen.png)
 
 
 ## Todo
