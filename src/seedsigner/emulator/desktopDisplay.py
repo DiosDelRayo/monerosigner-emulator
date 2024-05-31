@@ -1,6 +1,6 @@
 ######################################################################
+#  Work based on:
 #  Seedsigner desktop display driver and button emulator
-#
 #  by: @EnteroPositivo (Twitter, Gmail, GitHub)
 
 
@@ -18,6 +18,8 @@ from PIL import ImageTk
 
 import threading
 import os
+from typing import Optional
+from sys import exit
 
 EMULATOR_VERSION = '0.5'
         
@@ -33,6 +35,28 @@ class desktopDisplay(threading.Thread):
         threading.Thread.__init__(self)
         self.start()
 
+        from seedsigner.models.threads import BaseThread
+        from seedsigner.gui.screens.screen import PowerOffScreen
+        from seedsigner.views import view
+        class PowerOffView(view.View):
+            def run(self):
+                thread = PowerOffView.PowerOffThread()
+                thread.start()
+                PowerOffScreen().display()
+
+
+            class PowerOffThread(BaseThread):
+                def run(self):
+                    import time
+                    from subprocess import call
+                    while self.keep_running:
+                        time.sleep(10)
+                        call("kill $(ps aux | grep '[p]ython.*main.py' | awk '{print $2}')", shell=True)
+
+
+        # patch power off, to not power off the machine
+        view.PowerOffView = PowerOffView
+
     def callback(self):
         self.root.quit()
         self.root.destroy()
@@ -46,18 +70,22 @@ class desktopDisplay(threading.Thread):
         
         from seedsigner.controller import Controller
         controller = Controller.get_instance()
-        title= "SeedSigner Emulator v"+EMULATOR_VERSION+ " / "+controller.VERSION;
+        title_term = "MoneroSigner Emulator v"+EMULATOR_VERSION+ " / "+controller.VERSION;
+        title= "MoneroSigner"
 
         print("*****************************************************");
-        print(title);
-        print("https://github.com/enteropositivo/seedsigner-emulator");
+        print(title_term);
+        print("https://github.com/DiosDelRayo/monerosigner-emulator");
         print("*****************************************************");
 
         self.root.title(title)
 
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
         self.root.geometry("480x260+240+240")
-        self.root.configure(bg='orange')
+        self.root.maxsize(480, 260)
+        self.root.minsize(480, 260)
+        self.root.resizable(0, 0)
+        self.root.configure(bg='#ED5F00')
         self.root.iconphoto(False, tk.PhotoImage(file='seedsigner/resources/icons/emulator_icon.png'))
         # ....
 
@@ -68,40 +96,40 @@ class desktopDisplay(threading.Thread):
         self.joystick=Frame(self.root)
         self.joystick.pack()
         self.joystick.place(x=20, y=85)
-        self.joystick.configure(bg='orange')
+        self.joystick.configure(bg='#ED5F00')
         
         pixel = tk.PhotoImage(width=1, height=1)
         
 
-        self.btnL = Button(self.joystick, image=pixel,  width=20, height=20,  command = HardwareButtons.KEY_LEFT_PIN, bg='white')
+        self.btnL = Button(self.joystick, image=pixel,  width=20, height=20,  command = HardwareButtons.KEY_LEFT_PIN, bg='black')
         self.btnL.grid(row=1, column=0)
         self.bindButtonClick(self.btnL)
 
-        self.btnR = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_RIGHT_PIN, bg='white')
+        self.btnR = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_RIGHT_PIN, bg='black')
         self.btnR.grid(row=1, column=2)
         self.bindButtonClick(self.btnR)
 
-        self.btnC = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_PRESS_PIN)
+        self.btnC = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_PRESS_PIN, bg='#2C2C2C')
         self.btnC.grid(row=1, column=1)
         self.bindButtonClick(self.btnC)
 
-        self.btnU = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_UP_PIN, bg='white')
+        self.btnU = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_UP_PIN, bg='black')
         self.btnU.grid(row=0, column=1)
         self.bindButtonClick(self.btnU)
 
-        self.btnD = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_DOWN_PIN, bg='white')
+        self.btnD = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_DOWN_PIN, bg='black')
         self.btnD.grid(row=2, column=1)
         self.bindButtonClick(self.btnD)
 
-        self.btn1 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY1_PIN, bg='white')
+        self.btn1 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY1_PIN, bg='black')
         self.btn1.place(x=400, y=60)
         self.bindButtonClick(self.btn1)
 
-        self.btn2 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY2_PIN, bg='white')
+        self.btn2 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY2_PIN, bg='black')
         self.btn2.place(x=400, y=116)
         self.bindButtonClick(self.btn2)
 
-        self.btn3 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY3_PIN, bg='white')
+        self.btn3 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY3_PIN, bg='black')
         self.btn3.place(x=400, y=172)
         self.bindButtonClick(self.btn3)
 
@@ -155,4 +183,3 @@ class desktopDisplay(threading.Thread):
         
     def clear(self):
         """Clear contents of image buffer"""
- 

@@ -1,0 +1,12 @@
+# Todo
+- [ ] Show a dialog to choose camera if there is more then one available on the system (IR cam sucks for that purpose...)
+- [ ] Easy way to run Emulator on Windows without messing up the repos
+- [ ] Easy way to run Emulator on MacOS without messing up the repos
+- [ ] Build chain for building executable for linux
+- [ ] Build chain for building executable for win32
+- [ ] Build chain for building executable for macOS
+- [x] Intercept shutdown from the Emulator shutting down the machine
+- [x] deactivate resize window
+- [x] change colors
+- [x] change texts
+- [x] change title bar
