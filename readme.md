@@ -21,8 +21,6 @@ Planed features:
 - [ ] Build executable for win32 on Windows (maybe cross compiling or using vagrant to build)
 - [ ] Build AppImage for MacOS on MacOS (maybe using vagrant to build, still fighting with a newer version of MacOS in lvm/libvirt/qemu)
 
-![](img/demo.gif)
-
 ## Quickstart (Linux, win32, MacOS coming soon)
 Do following in your console:
 ```
