@@ -7,6 +7,7 @@ import time
 from .webcamvideostream import WebcamVideoStream
 from seedsigner.emulator.virtualGPIO import GPIO
 from seedsigner.hardware.buttons import HardwareButtons
+from seedsigner.resources import get as res
 
 from tkinter import *
 import tkinter as tk
@@ -87,8 +88,9 @@ class desktopDisplay(threading.Thread):
         self.root.minsize(480, 260)
         self.root.resizable(0, 0)
         self.root.configure(bg='#ED5F00')
-        self.root.iconphoto(False, tk.PhotoImage(file='seedsigner/resources/icons/emulator_icon.png'))
-        # ....
+        # self.root.iconphoto(False, tk.PhotoImage(file='seedsigner/resources/icons/emulator_icon.png')) # TODO: 2024-06-04, remove
+        self.root.iconphoto(False, tk.PhotoImage(data=res('icons', 'emulator_icon.png')))
+        # .... # TODO: 2024-06-30, WTF? What kind of comment is that?
 
 
         self.label=Label(self.root)

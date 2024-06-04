@@ -16,8 +16,10 @@ The Emulator should still work with [SeedSigner](https://github.com/SeedSigner/s
 
 To run the **MoneroSigner Emulator** on Linux you need to clone [MoneroSigner](https://github.com/DiosDelRayo/MoneroSigner) and [MoneroSigner Emulator](https://github.com/DiosDelRayo/monerosigner-emulator) in the same folder, then create a virtual environment with `python3 -m venv .`, `make install`, `make load` and `make run` and you are running on Linux the the emulator. On Windows or MacOS I'm not yet aware if there is a an overlay file system (`mount -t overlay`) which is used to run the emulator without to touch anything on any repository.
 
+If you have more then one camera on the system there will appear a dropdown list on the upper left corner to select the camera which will be used next time.
+
 Planed features:
-- [ ] Build executable for linux on linux
+- [x] Build executable for linux on linux
 - [ ] Build executable for win32 on Windows (maybe cross compiling or using vagrant to build)
 - [ ] Build AppImage for MacOS on MacOS (maybe using vagrant to build, still fighting with a newer version of MacOS in lvm/libvirt/qemu)
 
