@@ -5,12 +5,23 @@ set EMULATOR_DIR=.
 set DIST_DIR=dist
 set BUILD_DIR=build
 
+if "%1"=="requirements" goto requirements
 if "%1"=="load" goto load
 if "%1"=="unload" goto unload
 if "%1"=="install" goto install
 if "%1"=="run" goto run
 if "%1"=="executable" goto executable
 if "%1"=="clean" goto clean
+if "%1"=="openssh" goto openssh
+
+:requirements
+@echo off
+powershell.exe -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
+
+choco install python -y
+choco install git -y
+choco install vim -y
+goto end
 
 :load
 mkdir "%EMULATOR_DIR%\emulator"
@@ -44,6 +55,14 @@ goto end
 
 :clean
 for /d /r "%EMULATOR_DIR%" %%d in (__pycache__) do @if exist "%%d" rd /s /q "%%d"
+goto end
+
+:openssh
+echo.
+echo Please enter your public SSH key that will be used for authentication:
+set /p SSH_KEY=
+rem Install OpenSSH server using Chocolatey and set public key
+choco install win32-openssh -y --params '/SSHKeyPairProvider:"%SSH_KEY%"'
 goto end
 
 :end
