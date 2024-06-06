@@ -4,6 +4,8 @@ set MONERO_SIGNER_DIR=..\MoneroSigner
 set EMULATOR_DIR=.
 set DIST_DIR=dist
 set BUILD_DIR=build
+set VC_REDIST_x86="%EMULATOR_DIR%\VC_redist.x86.exe"
+set VC_REDIST_x64="%EMULATOR_DIR%\VC_redist.x64.exe"
 
 if "%1"=="bootstrap" goto bootstrap
 if "%1"=="requirements" goto requirements
@@ -62,7 +64,7 @@ rmdir /S /Q "%BUILD_DIR%"
 rmdir /S /Q "%DIST_DIR%"
 xcopy /E /I "%MONERO_SIGNER_DIR%\src" "%BUILD_DIR%"
 xcopy /E /I "%EMULATOR_DIR%\src" "%BUILD_DIR%"
-pyinstaller --onefile -n xmrsigner --add-data "%BUILD_DIR%\seedsigner\resources;seedsigner\resources" --collect-all seedsigner --collect-data "seedsigner;seedsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk "%BUILD_DIR%\main.py"
+pyinstaller --onefile -n xmrsigner --add-data "%BUILD_DIR%\seedsigner\resources;seedsigner\resources" --add-data "%VC_REDIST_x86%;." --add-data "%VC_REDIST_x64%;." --collect-all seedsigner --collect-data "seedsigner;seedsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk "%BUILD_DIR%\main.py"
 goto end
 
 :clean
