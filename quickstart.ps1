@@ -5,6 +5,9 @@ $EMULATOR_DIR = "."
 $DIST_DIR = "dist"
 $BUILD_DIR = "build"
 
+echo Quickstart
+echo $args
+echo $env:PSModulePath
 if ($args.Length -eq 0 -and -not $env:PSModulePath) {
     Set-ExecutionPolicy Bypass -Scope Process -Force
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
