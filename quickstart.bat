@@ -5,6 +5,7 @@ set EMULATOR_DIR=.
 set DIST_DIR=dist
 set BUILD_DIR=build
 
+if "%1"=="bootstrap" goto bootstrap
 if "%1"=="requirements" goto requirements
 if "%1"=="load" goto load
 if "%1"=="unload" goto unload
@@ -14,6 +15,7 @@ if "%1"=="executable" goto executable
 if "%1"=="clean" goto clean
 if "%1"=="openssh" goto openssh
 
+:bootstrap
 :requirements
 @echo off
 powershell.exe -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
@@ -21,6 +23,16 @@ powershell.exe -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [Syst
 choco install python -y
 choco install git -y
 choco install vim -y
+if "%1"=="bootstrap" goto clone
+goto end
+
+:clone
+@echo off
+set EMULATOR_DIR="C:\monerosigner"
+mkdir "%EMULATOR_DIR%"
+cd "%EMULATOR_DIR%"
+git clone https://github.com/DiosDelRayo/MoneroSigner.git
+git clone https://github.com/DiosDelRayo/monerosigner-emulator.git
 goto end
 
 :load

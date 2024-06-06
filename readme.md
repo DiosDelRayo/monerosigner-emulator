@@ -24,6 +24,8 @@ Planed features:
 - [ ] Build AppImage for MacOS on MacOS (maybe using vagrant to build, still fighting with a newer version of MacOS in lvm/libvirt/qemu)
 
 ## Quickstart (Linux, win32, MacOS coming soon)
+
+### Linux
 Do following in your console:
 ```
 mkdir -p monerosigner
@@ -45,6 +47,12 @@ For all future uses you can use it simply with:
 cd monerosigner-emulator
 source bin/activate
 make load && make run; make unload
+```
+
+### Windows
+Execute the following command in the Terminal to install all dependencies and clone the necessary archives:
+```
+powershell -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/DiosDelRayo/monero-signer/master/quickstart.bat')) 'bootstrap'"
 ```
 
 **WARNING: __Do not use restart shutdown o restart in the MoneroSigner at the moment how it will shutdown/reboot your machine. Will search for a possibility to intercept it. Close for the moment simply the emulator window (X)__** [#Todo](Todo.md)

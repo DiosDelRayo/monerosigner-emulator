@@ -89,9 +89,6 @@ class desktopDisplay(threading.Thread):
         self.root.resizable(0, 0)
         self.root.configure(bg='#ED5F00')
         self.root.iconphoto(False, tk.PhotoImage(data=res('icons', 'logo_black_64.png')))
-        # self.root.iconphoto(False, tk.PhotoImage(data=res('icons', 'emulator_icon.png')))
-        # .... # TODO: 2024-06-30, WTF? What kind of comment is that?
-
 
         self.label=Label(self.root)
         self.label.pack()
