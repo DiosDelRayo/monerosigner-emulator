@@ -6,7 +6,7 @@ $DIST_DIR = "dist"
 $BUILD_DIR = "build"
 
 echo Quickstart
-if (-not $hostinvocation) {
+if ($action -eq "bootstrap") {
     Set-ExecutionPolicy Bypass -Scope Process -Force
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
     iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
@@ -20,7 +20,7 @@ if (-not $hostinvocation) {
     git clone https://github.com/DiosDelRayo/MoneroSigner.git
     git clone https://github.com/DiosDelRayo/monerosigner-emulator.git
 }
-elseif ($action -eq "requirements") {
+if ($action -eq "requirements") {
     pip install --upgrade -r requirements.txt
 }
 elseif ($action -eq "load") {
