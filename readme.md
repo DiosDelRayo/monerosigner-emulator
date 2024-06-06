@@ -50,9 +50,19 @@ make load && make run; make unload
 ```
 
 ### Windows
-Execute the following command in the Terminal to install all dependencies and clone the necessary archives:
+Execute the following command in the Cmd to install all dependencies and clone the necessary archives:
 ```
-powershell -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/DiosDelRayo/monero-signer/master/quickstart.bat')) 'bootstrap'"
+powershell -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/DiosDelRayo/monerosigner-emulator/master/quickstart.bat')) 'bootstrap'"
+```
+
+Terminal (Powershell)
+```
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/DiosDelRayo/monerosigner-emulator/master/quickstart.ps1')); & quickstart.ps1 -action bootstrap"
+```
+
+Later from the repository:
+```
+powershell -ExecutionPolicy Bypass -File quickstart.ps1 -action executable
 ```
 
 **WARNING: __Do not use restart shutdown o restart in the MoneroSigner at the moment how it will shutdown/reboot your machine. Will search for a possibility to intercept it. Close for the moment simply the emulator window (X)__** [#Todo](Todo.md)
