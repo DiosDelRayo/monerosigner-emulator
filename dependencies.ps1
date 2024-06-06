@@ -13,7 +13,9 @@ choco install python -y
 choco install git -y
 choco install vim -y
 
+refreshenv
+
 mkdir "C:\monerosigner"
 cd "C:\monerosigner"
-'C:\Program Files\Git\bin\git.exe' clone https://github.com/DiosDelRayo/MoneroSigner.git
-'C:\Program Files\Git\bin\git.exe' clone https://github.com/DiosDelRayo/monerosigner-emulator.git
+git clone https://github.com/DiosDelRayo/MoneroSigner.git
+git clone https://github.com/DiosDelRayo/monerosigner-emulator.git
