@@ -6,6 +6,11 @@ $DIST_DIR = "dist"
 $BUILD_DIR = "build"
 
 echo Quickstart
+
+param {
+	[string]$action
+}
+
 if ($action -eq "bootstrap") {
     Set-ExecutionPolicy Bypass -Scope Process -Force
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
