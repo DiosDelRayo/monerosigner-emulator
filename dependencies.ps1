@@ -15,5 +15,5 @@ choco install vim -y
 
 mkdir "C:\monerosigner"
 cd "C:\monerosigner"
-git clone https://github.com/DiosDelRayo/MoneroSigner.git
-git clone https://github.com/DiosDelRayo/monerosigner-emulator.git
+'C:\Program Files\Git\bin\git.exe' clone https://github.com/DiosDelRayo/MoneroSigner.git
+'C:\Program Files\Git\bin\git.exe' clone https://github.com/DiosDelRayo/monerosigner-emulator.git
