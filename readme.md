@@ -50,24 +50,7 @@ make load && make run; make unload
 ```
 
 ### Windows
-Execute the following command in the Cmd to install all dependencies and clone the necessary archives:
-```
-powershell -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/DiosDelRayo/monerosigner-emulator/master/quickstart.bat')) 'bootstrap'"
-```
-
-Terminal (Powershell)
-```
-powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/DiosDelRayo/monerosigner-emulator/master/quickstart.ps1')); & quickstart.ps1 -action bootstrap"
-```
-
-Later from the repository:
-```
-powershell -ExecutionPolicy Bypass -File quickstart.ps1 -action executable
-```
-
-**WARNING: __Do not use restart shutdown o restart in the MoneroSigner at the moment how it will shutdown/reboot your machine. Will search for a possibility to intercept it. Close for the moment simply the emulator window (X)__** [#Todo](Todo.md)
-
-Now you should see the emulator.
+Regrettably, I encountered some challenges with pyzbar on Windows today, along with several other issues. After spending 5 frustrating hours trying to resolve them, I've come to the conclusion that it's not worth investing any more time on this particular issue as it was only intended for a brief overview. If you plan to use it for development, I would recommend considering a more reliable operating system or utilizing a Linux virtual machine. Dealing with compatibility on Windows can be quite a hassle. For those of you determined to make it work on Win32, by all means, go ahead, but in my personal opinion, it's not a productive use of time. I am still happy to assist in building the image through Docker on Win32, as it serves a practical purpose, but I fail to see the benefits of emulation on Windows.
 
 ## Executables, as soon I have a build chain I will frequently release them in Releases
 
