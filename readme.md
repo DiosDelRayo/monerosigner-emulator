@@ -20,8 +20,8 @@ If you have more then one camera on the system there will appear a dropdown list
 
 Planed features:
 - [x] Build executable for linux on linux
-- [ ] Build executable for win32 on Windows (maybe cross compiling or using vagrant to build)
-- [ ] Build AppImage for MacOS on MacOS (maybe using vagrant to build, still fighting with a newer version of MacOS in lvm/libvirt/qemu)
+- [x] Build executable for win32 on Windows
+- [x] ~~Build AppImage for MacOS on MacOS~~ For MacOS try docker
 
 ## Quickstart (Linux, win32, MacOS coming soon)
 
@@ -50,7 +50,37 @@ make load && make run; make unload
 ```
 
 ### Windows
-Regrettably, I encountered some challenges with pyzbar on Windows today, along with several other issues. After spending 5 frustrating hours trying to resolve them, I've come to the conclusion that it's not worth investing any more time on this particular issue as it was only intended for a brief overview. If you plan to use it for development, I would recommend considering a more reliable operating system or utilizing a Linux virtual machine. Dealing with compatibility on Windows can be quite a hassle. For those of you determined to make it work on Win32, by all means, go ahead, but in my personal opinion, it's not a productive use of time. I am still happy to assist in building the image through Docker on Win32, as it serves a practical purpose, but I fail to see the benefits of emulation on Windows.
+Run the following script to install dependencies:
+```
+powershell -Command "& {Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/DiosDelRayo/monerosigner-emulator/master/dependencies.ps1?v=' + (Get-Date -Format 'yyyyMMddHHmmss')))}"
+```
+
+You need to install also [vcredist](https://www.microsoft.com/en-US/download/details.aspx?id=40784) for your machine.
+
+Then you can build the executable with:
+```
+.\quickstart.bat executable
+```
+
+or run simply the emulator with:
+```
+.\quickstart.bat load
+```
+to copy all in on file and then finally:
+```
+.\quickstart.bat run
+```
+
+### MacOS
+I thought already Windows is the hell (and it was), but MacOS...
+Well, seems that Python TCL/TK is utterly broken. Had years ago that issue, and switched to PyQt because of that. I can't get it work in the VM. With docker it should work, but I can't test. How I have no more Apple machines - end I don't plan ever in my life to get any Apple device. You are on your own except sombody else will test it and gives feedback.
+
+So you can try:
+```
+docker pull vthor/monerosigner-emulator
+VIDEO_DEVICE=/dev/video0
+docker run -e DISPLAY=:0 --device=${VIDEO_DEVICE} vthor/monerosigner-emulator
+```
 
 ## Executables, as soon I have a build chain I will frequently release them in Releases
 
