@@ -1,10 +1,10 @@
 from PIL import Image, ImageDraw
 from threading import Lock
 
-from seedsigner.gui.components import Fonts, GUIConstants
-#from seedsigner.hardware.ST7789 import ST7789
-from seedsigner.emulator.desktopDisplay import desktopDisplay
-from seedsigner.models.singleton import ConfigurableSingleton
+from xmrsigner.gui.components import Fonts, GUIConstants
+#from xmrsigner.hardware.ST7789 import ST7789
+from xmrsigner.emulator.desktopDisplay import desktopDisplay
+from xmrsigner.models.singleton import ConfigurableSingleton
 
 
 

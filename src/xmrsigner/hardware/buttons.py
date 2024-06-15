@@ -1,9 +1,9 @@
 from typing import List
 #import RPi.GPIO as GPIO
-from seedsigner.emulator.virtualGPIO import GPIO
+from xmrsigner.emulator.virtualGPIO import GPIO
 import time
 
-from seedsigner.models.singleton import Singleton
+from xmrsigner.models.singleton import Singleton
 
 class HardwareButtons(Singleton):
     
@@ -51,7 +51,7 @@ class HardwareButtons(Singleton):
 
     def wait_for(self, keys=[], check_release=True, release_keys=[]) -> int:
         # TODO: Refactor to keep control in the Controller and not here
-        from seedsigner.controller import Controller
+        from xmrsigner.controller import Controller
         controller = Controller.get_instance()
 
         if not release_keys:

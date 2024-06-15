@@ -5,9 +5,9 @@
 import time
 
 from .webcamvideostream import WebcamVideoStream
-from seedsigner.emulator.virtualGPIO import GPIO
-from seedsigner.hardware.buttons import HardwareButtons
-from seedsigner.resources import get as res
+from xmrsigner.emulator.virtualGPIO import GPIO
+from xmrsigner.hardware.buttons import HardwareButtons
+from xmrsigner.resources import get as res
 
 from tkinter import *
 import tkinter as tk
@@ -37,9 +37,9 @@ class desktopDisplay(threading.Thread):
         threading.Thread.__init__(self)
         self.start()
 
-        from seedsigner.models.threads import BaseThread
-        from seedsigner.gui.screens.screen import PowerOffScreen
-        from seedsigner.views import view
+        from xmrsigner.models.threads import BaseThread
+        from xmrsigner.gui.screens.screen import PowerOffScreen
+        from xmrsigner.views import view
         class PowerOffView(view.View):
             def run(self):
                 thread = PowerOffView.PowerOffThread()
@@ -70,7 +70,7 @@ class desktopDisplay(threading.Thread):
         """run thread"""    
         self.root = tk.Tk()
 
-        from seedsigner.controller import Controller
+        from xmrsigner.controller import Controller
         controller = Controller.get_instance()
         title_term = "MoneroSigner Emulator v"+EMULATOR_VERSION+ " / "+controller.VERSION;
         title= "MoneroSigner"

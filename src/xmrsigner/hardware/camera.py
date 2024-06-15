@@ -2,11 +2,11 @@ import io
 
 #from picamera import PiCamera
 from PIL import Image
-#from seedsigner.hardware.pivideostream import PiVideoStream
-from seedsigner.emulator.webcamvideostream import WebcamVideoStream
+#from xmrsigner.hardware.pivideostream import PiVideoStream
+from xmrsigner.emulator.webcamvideostream import WebcamVideoStream
 
-from seedsigner.models.settings import Settings, SettingsConstants
-from seedsigner.models.singleton import Singleton
+from xmrsigner.models.settings import Settings, SettingsConstants
+from xmrsigner.models.singleton import Singleton
 
 
 
