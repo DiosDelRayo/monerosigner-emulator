@@ -3,7 +3,7 @@ EMULATOR_DIR=.
 DIST_DIR=dist
 BUILD_DIR=build
 VIDEO_DEVICE=/dev/video0
-VERSION := $(shell grep VERSION ../MoneroSigner/src/seedsigner/controller.py | awk -F'"' '{ print $$2 }')
+VERSION := $(shell grep VERSION ../MoneroSigner/src/xmrsigner/controller.py | awk -F'"' '{ print $$2 }')
 
 default: load
 
@@ -54,3 +54,14 @@ docker-run: docker-image
 
 docker-push: docker-image
 	docker push vthor/monerosigner-emulator:${VERSION}
+
+update-version:
+	sed -i -e "s/EMULATOR_VERSION = '[0-9]*\.[0-9]*\.[0-9]*'/EMULATOR_VERSION = '${VERSION}'/" src/xmrsigner/emulator/desktopDisplay.py
+	git add src/xmrsigner/emulator/desktopDisplay.py
+	git commit -m 'Updated version to ${VERSION} to match MoneroSigner'
+
+tag-version:
+	git tag -f v${VERSION}
+
+push-tag: update-version tag-version
+	git push --tags -f origin master
