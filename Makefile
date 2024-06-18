@@ -35,7 +35,7 @@ executable:
 	rm -rf ${DIST_DIR}/*
 	cp -ar ${MONERO_SIGNER_DIR}/src/* build/
 	cp -ar ${EMULATOR_DIR}/src/* build/
-	pyinstaller --onefile -n xmrsigner-${VERSION} --add-data "${BUILD_DIR}/seedsigner/resources:seedsigner/resources" --collect-all seedsigner --collect-data "seedsigner:seedsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk ${BUILD_DIR}/main.py
+	pyinstaller --onefile -n xmrsigner-${VERSION} --add-data "${BUILD_DIR}/xmrsigner/resources:xmrsigner/resources" --collect-all xmrsigner --collect-data "xmrsigner:xmrsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk ${BUILD_DIR}/main.py
 
 clean:
 	find src -type d -name __pycache__ -exec rm -rf \{\} \;
