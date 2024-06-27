@@ -22,7 +22,7 @@ from typing import Optional
 from sys import exit
 from typing import List
 
-EMULATOR_VERSION = '0.4.4'
+EMULATOR_VERSION = '0.4.5'
 
 
 class desktopDisplay(threading.Thread):
