@@ -12,7 +12,7 @@ choco install git -y
 
 refreshenv
 
-mkdir "C:\monerosigner"
-cd "C:\monerosigner"
+mkdir "C:\xmrsigner"
+cd "C:\xmrsigner"
 git clone https://github.com/DiosDelRayo/MoneroSigner.git
 git clone https://github.com/DiosDelRayo/monerosigner-emulator.git

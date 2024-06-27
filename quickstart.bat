@@ -42,7 +42,7 @@ rmdir /S /Q "%BUILD_DIR%"
 rmdir /S /Q "%DIST_DIR%"
 xcopy /E /I "%MONERO_SIGNER_DIR%\src" "%BUILD_DIR%"
 xcopy /E /I /Y "%EMULATOR_DIR%\src" "%BUILD_DIR%"
-pyinstaller --onefile -n xmrsigner --add-data "%VC_REDIST_x86%;." --add-data "%VC_REDIST_x64%;." --add-binary "%EMULATOR_DIR%\Lib\site-packages\pyzbar\libzbar-64.dll;." --add-binary "%EMULATOR_DIR%\Lib\site-packages\pyzbar\libiconv.dll;." --collect-data "seedsigner;seedsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk --collect-submodules libiconv -p "%BUILD_DIR%" xmrsigner
+pyinstaller --onefile -n xmrsigner --add-data "%VC_REDIST_x86%;." --add-data "%VC_REDIST_x64%;." --add-binary "%EMULATOR_DIR%\Lib\site-packages\pyzbar\libzbar-64.dll;." --add-binary "%EMULATOR_DIR%\Lib\site-packages\pyzbar\libiconv.dll;." --collect-data "seedsigner;seedsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk --collect-submodules libiconv -p "%BUILD_DIR%" "%BUILD_DIR\xmrsigner\__main__.py"
 goto end
 
 :clean
