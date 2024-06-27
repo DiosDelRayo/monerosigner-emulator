@@ -72,8 +72,8 @@ class desktopDisplay(threading.Thread):
 
         from xmrsigner.controller import Controller
         controller = Controller.get_instance()
-        title_term = "MoneroSigner Emulator v"+EMULATOR_VERSION+ " / "+controller.VERSION;
-        title= "MoneroSigner"
+        title_term = "XmrSigner Emulator v"+EMULATOR_VERSION+ " / "+controller.VERSION;
+        title= "XmrSigner"
 
         print("*****************************************************");
         print(title_term);
