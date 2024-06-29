@@ -108,3 +108,6 @@ class Camera(Singleton):
     @property
     def monitor(self) -> Monitor:
         return self._monitor
+
+    def is_active(self):
+        return self._current_mode == CameraMode.Screen

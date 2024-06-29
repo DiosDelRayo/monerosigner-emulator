@@ -58,7 +58,7 @@ class Monitor:
     def zoom_resolution(self) -> Tuple[int, int]:
         return (int(self.width * self.zoom), int(self.height * self.zoom))
 
-    def cords(
+    def coords(
         self,
         left: Optional[int] = None,
         top: Optional[int] = None,
@@ -67,6 +67,10 @@ class Monitor:
         zoom: Optional[int] = None
     ) -> Tuple[Tuple[int, int], Tuple[int, int]]:
         return (((left or self.left), top or self.top), (left or self.left + int((width or self.width) * (zoom or self.zoom)), (top or self.top) + int((height or self.height) * (zoom or self.zoom))))
+
+    def bbox(self) -> Tuple[int, int, int, int]:
+        coords = self.coords()
+        return (coords[0][0], coords[0][1], coords[1][0], coords[1][1])
 
     def is_coord_in_screen(self, x: int, y: int) -> bool:
         return 0 <= x <= self.screen_width and 0 <= y <= self.screen_height
@@ -119,6 +123,7 @@ class Monitor:
     def __dict__(self) -> Dict:
         return {'top': self.top, 'left': self.left, 'width': int(self.width * self.zoom), 'height': int(self.height * self.zoom)}
 
+
 class ScreenCapture(StreamInputDevice):
 
     def __init__(self, monitor: Optional[Monitor] = None, framerate=30):
@@ -137,14 +142,7 @@ class ScreenCapture(StreamInputDevice):
         return self
 
     def screenshot(self):
-        return ImageGrab.grab(
-            bbox=(
-                self.monitor.left,
-                self.monitor.top, 
-                self.monitor.left + self.monitor.width, 
-                self.monitor.top + self.monitor.height
-            )
-        )
+        return ImageGrab.grab(bbox=self.monitor.bbox())
 
     def update(self) -> None:
         while not self.should_stop:
@@ -165,6 +163,6 @@ class ScreenCapture(StreamInputDevice):
     def set_monitor(self, monitor):
         self.monitor = monitor
 
-    def single_frame(self, monitor: Optional[Monitor] = None):
+    def single_frame(self):
         frame = np_array(self.screenshot())
         return cvtColor(frame, COLOR_RGBA2RGB)

@@ -2,13 +2,14 @@
 #  Work based on:
 #  Seedsigner desktop display driver and button emulator
 #  by: @EnteroPositivo (Twitter, Gmail, GitHub)
-import time
+from time import sleep
 
 from .webcamvideostream import WebcamVideoStream
 from xmrsigner.emulator.virtualGPIO import GPIO
 from xmrsigner.hardware.buttons import HardwareButtons
 from xmrsigner.resources import get as res
 from xmrsigner.hardware.camera import Camera, CameraMode
+from .capturewindow import TransparentCaptureWindow
 
 from tkinter import *
 import tkinter as tk
@@ -52,15 +53,16 @@ class desktopDisplay(threading.Thread):
 
             class PowerOffThread(BaseThread):
                 def run(self):
-                    import time
                     from subprocess import call
                     while self.keep_running:
-                        time.sleep(10)
+                        sleep(10)
                         call("kill $(ps aux | grep '[p]ython.*main.py' | awk '{print $2}')", shell=True)
 
 
         # patch power off, to not power off the machine
         view.PowerOffView = PowerOffView
+        self.capture_window = None
+        self.capture_window_visible = False
 
     def callback(self):
         self.root.quit()
@@ -153,6 +155,14 @@ class desktopDisplay(threading.Thread):
 
         self.root.bind("<Key>", key_handler)
 
+        # Add a toggle button for the capture window
+        self.capture_window_btn = Button(self.root, text="Toggle Capture Window", command=self.toggle_capture_window)
+        self.capture_window_btn.place(x=10, y=50)
+        self.capture_window_btn.config(width=7, bg='#ED5F00', fg='#FFFFFF')
+
+        # Create the transparent capture window
+        self.capture_window = TransparentCaptureWindow(self.root, Camera.get_instance().monitor)
+
         self.root.resizable(width = True, height = True)
         self.root.mainloop()
 
@@ -173,7 +183,7 @@ class desktopDisplay(threading.Thread):
         GPIO.fire_raise_event(pin)
 
     def ShowImage(self,Image2,Xstart,Ystart):
-        while(self.root==0): time.sleep(0.1)
+        while(self.root==0): sleep(0.1)
         imwidth, imheight = Image2.size
         if imwidth != self.width or imheight != self.height:
             raise ValueError('Image must be same dimensions as display \
@@ -187,6 +197,13 @@ class desktopDisplay(threading.Thread):
     def clear(self):
         """Clear contents of image buffer"""
 
+    def toggle_capture_window(self):
+        if Camera.get_instance().is_active():
+            self.capture_window.toggle()
+            self.capture_window_visible = not self.capture_window_visible
+        else:
+            print("Camera is not active. Cannot show capture window.")
+
     def set_available_cameras(self, camera_list: List[int]):
         print(camera_list)
         self.available_cameras = camera_list
@@ -197,9 +214,13 @@ class desktopDisplay(threading.Thread):
         camera = self.camera_var.get()
         if camera == VIRTUAL_SCREEN_CAM:
             Camera.get_instance().set_mode(CameraMode.Screen)
+            if self.capture_window_visible:
+                self.capture_window.show()
         else:
             Camera.get_instance().set_mode(CameraMode.WebCam)
             WebcamVideoStream.set_default_camera(int(camera))
+            self.capture_window.hide()
+            self.capture_window_visible = False
 
     def show_camera_dropdown_list(self):
         self.camera_var = tk.StringVar(self.root)
