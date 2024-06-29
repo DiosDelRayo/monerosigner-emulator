@@ -8,6 +8,7 @@ from .webcamvideostream import WebcamVideoStream
 from xmrsigner.emulator.virtualGPIO import GPIO
 from xmrsigner.hardware.buttons import HardwareButtons
 from xmrsigner.resources import get as res
+from xmrsigner.hardware.camera import Camera, CameraMode
 
 from tkinter import *
 import tkinter as tk
@@ -22,7 +23,9 @@ from typing import Optional
 from sys import exit
 from typing import List
 
+
 EMULATOR_VERSION = '0.4.5'
+VIRTUAL_SCREEN_CAM = 'vScreen'
 
 
 class desktopDisplay(threading.Thread):
@@ -187,13 +190,21 @@ class desktopDisplay(threading.Thread):
     def set_available_cameras(self, camera_list: List[int]):
         print(camera_list)
         self.available_cameras = camera_list
-        if len(self.available_cameras) > 1:
+        if len(self.available_cameras) > 0:
             self.show_camera_dropdown_list()
+
+    def update_default_camera(self, *args):
+        camera = self.camera_var.get()
+        if camera == VIRTUAL_SCREEN_CAM:
+            Camera.get_instance().set_mode(CameraMode.Screen)
+        else:
+            Camera.get_instance().set_mode(CameraMode.WebCam)
+            WebcamVideoStream.set_default_camera(int(camera))
 
     def show_camera_dropdown_list(self):
         self.camera_var = tk.StringVar(self.root)
         self.camera_var.set(self.available_cameras[0])
-        self.camera_dropdown = tk.OptionMenu(self.root, self.camera_var, *self.available_cameras)
-        self.camera_dropdown.config(width=3, bg='#ED5F00', fg='#FFFFFF')
+        self.camera_dropdown = tk.OptionMenu(self.root, self.camera_var, VIRTUAL_SCREEN_CAM, *self.available_cameras)
+        self.camera_dropdown.config(width=5, bg='#ED5F00', fg='#FFFFFF')
         self.camera_dropdown.place(x=10, y=10)
-        self.camera_var.trace('w', lambda *args: WebcamVideoStream.set_default_camera(int(self.camera_var.get())))
+        self.camera_var.trace('w', self.update_default_camera)

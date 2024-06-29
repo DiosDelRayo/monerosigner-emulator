@@ -5,7 +5,12 @@ from xmrsigner.emulator.webcamvideostream import WebcamVideoStream
 from xmrsigner.emulator.screencapture import ScreenCapture, Monitor
 from xmrsigner.models.settings import Settings, SettingsConstants
 from xmrsigner.models.singleton import Singleton
+from enum import Enum
 
+
+class CameraMode(Enum):
+    Screen = 1
+    WebCam = 2
 
 
 class Camera(Singleton):
@@ -13,7 +18,7 @@ class Camera(Singleton):
     _picamera = None
     _screen_capture = None
     _camera_rotation = None
-    _current_mode = None
+    _current_mode: CameraMode = CameraMode.WebCam
     _monitor: Monitor = None
 
     @classmethod
@@ -22,33 +27,32 @@ class Camera(Singleton):
         if cls._instance is None:
             cls._instance = cls.__new__(cls)
         cls._instance._camera_rotation = int(Settings.get_instance().get_value(SettingsConstants.SETTING__CAMERA_ROTATION))
+        cls._instance._monitor = Monitor(width=512, height=384)
         return cls._instance
 
 
-    def start_video_stream_mode(self, resolution=(512, 384), framerate=12, format='bgr', mode='webcam'):
+    def start_video_stream_mode(self, resolution=(512, 384), framerate=12, format='bgr'):
         if self._video_stream is not None or self._screen_capture is not None:
             self.stop_video_stream_mode()
 
-        if mode == 'webcam':
+        if self._current_mode == CameraMode.WebCam:
             self._video_stream = WebcamVideoStream(resolution=resolution, framerate=framerate, format=format)
             self._video_stream.start()
-        elif mode == 'screen':
-            self._monitor = Monitor(width=resolution[0], height=resolution[1])
+        elif self._current_mode == CameraMode.Screen:
+            self._monitor = self._monitor
             self._screen_capture = ScreenCapture(monitor=self._monitor, framerate=framerate)
             self._screen_capture.start()
         else:
             raise ValueError("Invalid mode. Choose 'webcam' or 'screen'.")
 
-        self._current_mode = mode
-
     def read_video_stream(self, as_image=False):
-        if self._current_mode == 'webcam':
+        if self._current_mode == CameraMode.WebCam:
             if not self._video_stream:
                 raise Exception("Must call start_video_stream first.")
             if not self._video_stream.hasCamera():
                 raise Exception("Can not open Webcam")
             frame = self._video_stream.read()
-        elif self._current_mode == 'screen':
+        elif self._current_mode == CameraMode.Screen:
             if not self._screen_capture:
                 raise Exception("Must call start_video_stream first.")
             frame = self._screen_capture.read()
@@ -71,13 +75,6 @@ class Camera(Singleton):
         if self._screen_capture is not None:
             self._screen_capture.stop()
             self._screen_capture = None
-        self._current_mode = None
-        self._monitor = None
-
-        self.stop_video_stream_mode()
-        self._current_mode = mode
-        if mode == "screen":
-            self._monitor = Monitor(width=resolution[0], height=resolution[1])
 
     def start_single_frame_mode(self, resolution=(720, 480)):
         if self._video_stream is not None:
@@ -87,9 +84,9 @@ class Camera(Singleton):
 
 
     def capture_frame(self):
-        if self._current_mode == 'webcam':
+        if self._current_mode == CameraMode.WebCam:
             frame = WebcamVideoStream.single_frame()
-        elif self._current_mode == 'screen':
+        elif self._current_mode == CameraMode.Screen:
             frame = ScreenCapture.single_frame(self._monitor)
         else:
             raise Exception('Invalid mode.')
@@ -100,8 +97,13 @@ class Camera(Singleton):
         if self._picamera is not None:
             self._picamera.close()
             self._picamera = None
-        self._current_mode = None
-        self._monitor = None
+
+    def set_mode(self, mode: CameraMode) -> None:
+        self._current_mode = mode
+
+    @property
+    def mode(self) -> CameraMode:
+        return self._current_mode
 
     @property
     def monitor(self) -> Monitor:

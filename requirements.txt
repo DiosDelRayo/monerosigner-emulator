@@ -1,5 +1,4 @@
 dataclasses==0.6
-embit==0.7.0
 numpy==1.26.4
 opencv-python==4.9.0.80
 Pillow==9.4.0
@@ -11,3 +10,4 @@ pyzbar @ git+https://github.com/seedsigner/pyzbar.git@c3c237821c6a20b17953efe59b
 urtypes @ git+https://github.com/selfcustody/urtypes.git@7fb280eab3b3563dfc57d2733b0bf5cbc0a96a6a
 monero @ git+https://github.com/DiosDelRayo/monero-python.git#egg=monero
 polyseed @ git+https://github.com/DiosDelRayo/polyseed-python.git#egg=polyseed
+pyscreenshot==3.1

@@ -1,7 +1,7 @@
 from numpy import array as np_array
 from dataclasses import dataclass
 from cv2 import cvtColor, COLOR_RGBA2RGB
-from mss import mss
+import pyscreenshot as ImageGrab
 from threading import Thread
 from time import sleep
 from typing import Dict, Tuple, Optional
@@ -27,7 +27,13 @@ class Monitor:
     def center(self) -> Tuple[int, int]:
         return (self.left + int((self.width * self.zoom) // 2), self.top + int((self.height * self.zoom) // 2))
 
-    def xy(self, center: Optional[Tuple[int, int]], width: Optional[int] = None, height: Optional[int] = None, zoom: Optional[int]) -> Tuple[int, int]:
+    def xy(
+        self,
+        center: Optional[Tuple[int, int]],
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        zoom: Optional[int] = None
+    ) -> Tuple[int, int]:
         x, y = center or (self.left, self.top)
         w = width or self.width
         h = height or self.height
@@ -63,7 +69,7 @@ class Monitor:
         return (((left or self.left), top or self.top), (left or self.left + int((width or self.width) * (zoom or self.zoom)), (top or self.top) + int((height or self.height) * (zoom or self.zoom))))
 
     def is_coord_in_screen(self, x: int, y: int) -> bool:
-        return 0 <= x <= self.screen_width and 0 <= y self.screen_height
+        return 0 <= x <= self.screen_width and 0 <= y <= self.screen_height
 
     def are_coords_in_screen(self, coords: Tuple[Tuple[int, int], Tuple[int, int]]) -> bool:
         return self.is_coord_in_screen(coords[0][0], coords[0][1]) and self.is_coord_in_screen(coords[1][0], coords[1][1])
@@ -75,7 +81,7 @@ class Monitor:
         if zoom_level < 0.1:
             if use_max:
                 zoom_level = 0.1
-            else
+            else:
                 return False
 
         if int(self.width * zoom_level) > self.screen_width or int(self.height * zoom_level) > self.screen_height:
@@ -104,7 +110,7 @@ class Monitor:
         return False
 
     def move(self, x: int, y: int, use_max: bool = False) -> bool:
-        return self.move_to_xy(self.left + x, y = self.top + y, use_max)
+        return self.move_to_xy(self.left + x, self.top + y, use_max)
 
     def move_center(self, x: int, y: int, use_max: bool = False) -> bool:
         x, y = self.xy((x, y))
@@ -121,7 +127,6 @@ class ScreenCapture(StreamInputDevice):
         self.frame = None
         self.should_stop = False
         self.is_stopped = True
-        self.sct = mss()
         print('Using virtual screen cam...')
 
     def start(self) -> None:
@@ -131,10 +136,19 @@ class ScreenCapture(StreamInputDevice):
         self.is_stopped = False
         return self
 
+    def screenshot(self):
+        return ImageGrab.grab(
+            bbox=(
+                self.monitor.left,
+                self.monitor.top, 
+                self.monitor.left + self.monitor.width, 
+                self.monitor.top + self.monitor.height
+            )
+        )
+
     def update(self) -> None:
         while not self.should_stop:
-            screenshot = self.sct.grab(self.monitor)
-            self.frame = cvtColor(np_array(screenshot), COLOR_RGBA2RGB)
+            self.frame = cvtColor(np_array(self.screenshot()), COLOR_RGBA2RGB)
             sleep(1 // self.framerate)
         
         self.is_stopped = True
@@ -152,7 +166,5 @@ class ScreenCapture(StreamInputDevice):
         self.monitor = monitor
 
     def single_frame(self, monitor: Optional[Monitor] = None):
-        with mss() as sct:
-            screenshot = sct.grab(monitor or Monitor())
-            frame = np_array(screenshot)
-            return cvtColor(frame, COLOR_RGBA2RGB)
+        frame = np_array(self.screenshot())
+        return cvtColor(frame, COLOR_RGBA2RGB)
