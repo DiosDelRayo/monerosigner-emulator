@@ -1,5 +1,3 @@
-import io
-
 #from picamera import PiCamera
 from PIL import Image
 #from xmrsigner.hardware.pivideostream import PiVideoStream
@@ -13,7 +11,10 @@ from xmrsigner.models.singleton import Singleton
 class Camera(Singleton):
     _video_stream = None
     _picamera = None
+
     _camera_rotation = None
+
+
 
     @classmethod
     def get_instance(cls):
@@ -24,7 +25,7 @@ class Camera(Singleton):
         return cls._instance
 
 
-    def start_video_stream_mode(self, resolution=(512, 384), framerate=12, format="bgr"):
+    def start_video_stream_mode(self, resolution=(512, 384), framerate=12, format='bgr'):
         if self._video_stream is not None:
             self.stop_video_stream_mode()
 
@@ -38,7 +39,7 @@ class Camera(Singleton):
             raise Exception("Must call start_video_stream first.")
 
         if not self._video_stream.hasCamera(): 
-            raise Exception("Can not open Webcam")
+            raise Exception('Can not open Webcam')
 
         frame = self._video_stream.read()
         if not as_image:
@@ -68,9 +69,7 @@ class Camera(Singleton):
         return Image.fromarray(frame ).rotate(90 + self._camera_rotation)
 
 
-
     def stop_single_frame_mode(self):
         if self._picamera is not None:
             self._picamera.close()
             self._picamera = None
-

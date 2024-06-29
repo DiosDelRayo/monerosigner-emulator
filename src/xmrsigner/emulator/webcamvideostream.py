@@ -1,10 +1,12 @@
 from threading import Thread
-import time
-import cv2
+from time import sleep
+from cv2 import VideoCapture, cvtColor, COLOR_BGR2RGB, resize
 from typing import List, Tuple, Optional
 
+from .streamdevice import StreamInputDevice
 
-class WebcamVideoStream:
+
+class WebcamVideoStream(StreamInputDevice):
 
     default_camera: int = 0
 
@@ -14,22 +16,22 @@ class WebcamVideoStream:
             camera = self.default_camera
 
         print(f'Using camera {camera}...')
-        self.camera = cv2.VideoCapture(camera)
+        self.camera = VideoCapture(camera)
         self.set_resolution(resolution)
 
+        self.framerate: int = framerate
         # initialize the frame and the variable used to indicate
         # if the thread should be stopped
         self.frame = None
         self.should_stop = False
         self.is_stopped = True
 
-    def start(self) -> bool:
+    def start(self) -> None:
         # start the thread to read frames from the video stream
         t = Thread(target=self.update, args=())
         t.daemon = True
         t.start()
         self.is_stopped = False
-        return self
 
     def hasCamera(self) -> bool:
         return self.camera.isOpened()
@@ -40,11 +42,10 @@ class WebcamVideoStream:
             while(not self.should_stop):
                 # grab the frame from the stream and clear the stream in
                 # preparation for the next frame
-                ret, stream = self.camera.read()
-                stream = cv2.resize(stream, (240,240))
-                stream = cv2.cvtColor(stream,cv2.COLOR_BGR2RGB)
-                time.sleep(0.05)
-                self.frame = stream
+                ret, frame = self.camera.read()
+                next_frame = cvtColor(resize(frame, (240,240)),COLOR_BGR2RGB)
+                sleep(1 // self.framerate)
+                self.frame = next_frame
 
             self.is_stopped = True
             self.should_stop = False
@@ -55,8 +56,6 @@ class WebcamVideoStream:
             self.should_stop = False
             return
 
-
-
     def read(self):
         return self.frame
 
@@ -64,7 +63,7 @@ class WebcamVideoStream:
         if not camera:
             camera = WebcamVideoStream.default_camera
         print(f'Using camera {camera} for still picture')
-        cap = cv2.VideoCapture(camera)
+        cap = VideoCapture(camera)
         ret, frame = cap.read()
         return frame
 
@@ -73,7 +72,7 @@ class WebcamVideoStream:
         self.should_stop = True
         # Block in this thread until stopped
         while not self.is_stopped:
-            pass
+            sleep(0.01)
 
     def set_resolution(self, resolution: Tuple[int, int]):
         self.camera.set(3, resolution[0])
@@ -86,7 +85,7 @@ class WebcamVideoStream:
         while index < max_cams_to_try:
             print(f'Check for camera: {index}...')
             try:
-                cap = cv2.VideoCapture(index)
+                cap = VideoCapture(index)
                 if cap.isOpened():
                     all_cams.append(index)
                     cap.release()
