@@ -1,231 +1,179 @@
-######################################################################
-#  Work based on:
-#  Seedsigner desktop display driver and button emulator
-#  by: @EnteroPositivo (Twitter, Gmail, GitHub)
+import sys
+from PyQt6.QtWidgets import QMainWindow, QLabel, QPushButton, QFrame, QVBoxLayout, QHBoxLayout, QComboBox
+from PyQt6.QtGui import QPixmap, QIcon
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PIL import Image, ImageQt
 from time import sleep
 
-from .webcamvideostream import WebcamVideoStream
 from xmrsigner.emulator.virtualGPIO import GPIO
 from xmrsigner.hardware.buttons import HardwareButtons
 from xmrsigner.resources import get as res
 from xmrsigner.hardware.camera import Camera, CameraMode
 from .capturewindow import TransparentCaptureWindow
 
-from tkinter import *
-import tkinter as tk
-# from tkinter import ttk
-
-
-from PIL import ImageTk
-
-import threading
-import os
 from typing import Optional
-from sys import exit
-from typing import List
-
 
 EMULATOR_VERSION = '0.4.5'
 VIRTUAL_SCREEN_CAM = 'vScreen'
 
+class DesktopDisplay(QMainWindow, QThread):
+    image_updated = pyqtSignal(QPixmap)
 
-class desktopDisplay(threading.Thread):
-    """class for desktop display."""
-    root=0
     def __init__(self):
+        super().__init__()
+        QThread.__init__(self)
         self.width = 240
         self.height = 240
-        self.available_cameras: List[int] = [] 
-
-        # Multithreading
-        threading.Thread.__init__(self)
-        self.start()
-
-        from xmrsigner.models.threads import BaseThread
-        from xmrsigner.gui.screens.screen import PowerOffScreen
-        from xmrsigner.views import view
-        class PowerOffView(view.View):
-            def run(self):
-                thread = PowerOffView.PowerOffThread()
-                thread.start()
-                PowerOffScreen().display()
-
-
-            class PowerOffThread(BaseThread):
-                def run(self):
-                    from subprocess import call
-                    while self.keep_running:
-                        sleep(10)
-                        call("kill $(ps aux | grep '[p]ython.*main.py' | awk '{print $2}')", shell=True)
-
-
-        # patch power off, to not power off the machine
-        view.PowerOffView = PowerOffView
+        self.available_cameras = []
         self.capture_window = None
         self.capture_window_visible = False
+        self.init_ui()
+        self.start()
 
-    def callback(self):
-        self.root.quit()
-        self.root.destroy()
-        # terminate the main thread forcefully
-        pid = os.getpid()
-        os.kill(pid,9)
+    def init_ui(self):
+        # Set up main window
+        self.setWindowTitle("XmrSigner")
+        self.setGeometry(240, 240, 480, 260)
+        self.setFixedSize(480, 260)
+        self.setStyleSheet("background-color: #ED5F00;")
+
+        # Set up layout
+        main_layout = QVBoxLayout()
+        self.central_widget = QFrame(self)
+        self.setCentralWidget(self.central_widget)
+        self.central_widget.setLayout(main_layout)
+
+        # Image label
+        self.label = QLabel(self)
+        main_layout.addWidget(self.label)
+
+        # Joystick frame
+        joystick_frame = QFrame(self)
+        joystick_layout = QVBoxLayout()
+        joystick_frame.setLayout(joystick_layout)
+
+        # Joystick buttons
+        self.btnU = self.create_button(HardwareButtons.KEY_UP_PIN)
+        self.btnL = self.create_button(HardwareButtons.KEY_LEFT_PIN)
+        self.btnC = self.create_button(HardwareButtons.KEY_PRESS_PIN)
+        self.btnR = self.create_button(HardwareButtons.KEY_RIGHT_PIN)
+        self.btnD = self.create_button(HardwareButtons.KEY_DOWN_PIN)
+
+        # Arrange joystick buttons
+        joystick_layout.addWidget(self.btnU, alignment=Qt.AlignCenter)
+        middle_row = QHBoxLayout()
+        middle_row.addWidget(self.btnL)
+        middle_row.addWidget(self.btnC)
+        middle_row.addWidget(self.btnR)
+        joystick_layout.addLayout(middle_row)
+        joystick_layout.addWidget(self.btnD, alignment=Qt.AlignCenter)
+
+        main_layout.addWidget(joystick_frame)
+
+        # Side buttons
+        self.btn1 = self.create_button(HardwareButtons.KEY1_PIN)
+        self.btn2 = self.create_button(HardwareButtons.KEY2_PIN)
+        self.btn3 = self.create_button(HardwareButtons.KEY3_PIN)
+
+        # Position side buttons
+        self.btn1.move(400, 60)
+        self.btn2.move(400, 116)
+        self.btn3.move(400, 172)
+
+        # Capture window toggle button
+        self.capture_window_btn = QPushButton("Toggle Capture Window", self)
+        self.capture_window_btn.clicked.connect(self.toggle_capture_window)
+        self.capture_window_btn.move(10, 50)
+
+        # Camera dropdown
+        self.camera_dropdown = QComboBox(self)
+        self.camera_dropdown.move(10, 10)
+        self.camera_dropdown.currentTextChanged.connect(self.update_default_camera)
+
+        self.image_updated.connect(self.update_image)
+
+    def create_button(self, command):
+        button = QPushButton(self)
+        button.setFixedSize(20, 20)
+        button.setStyleSheet("background-color: black;")
+        button.pressed.connect(lambda: self.button_pressed(command))
+        button.released.connect(lambda: self.button_released(command))
+        return button
+
+    def button_pressed(self, command):
+        GPIO.set_input(command, GPIO.HIGH)
+
+    def button_released(self, command):
+        GPIO.set_input(command, GPIO.LOW)
 
     def run(self):
-        """run thread"""    
-        self.root = tk.Tk()
+        # Thread logic here
+        pass
 
-        from xmrsigner.controller import Controller
-        controller = Controller.get_instance()
-        title_term = "XmrSigner Emulator v"+EMULATOR_VERSION+ " / "+controller.VERSION;
-        title= "XmrSigner"
+    def ShowImage(self, image, x_start, y_start):
+        q_image = ImageQt.ImageQt(image)
+        pixmap = QPixmap.fromImage(q_image)
+        self.image_updated.emit(pixmap)
 
-        print("*****************************************************");
-        print(title_term);
-        print("https://github.com/DiosDelRayo/monerosigner-emulator");
-        print("*****************************************************");
-
-        self.root.title(title)
-
-        self.root.protocol("WM_DELETE_WINDOW", self.callback)
-        self.root.geometry("480x260+240+240")
-        self.root.maxsize(480, 260)
-        self.root.minsize(480, 260)
-        self.root.resizable(0, 0)
-        self.root.configure(bg='#ED5F00')
-        self.root.iconphoto(False, tk.PhotoImage(data=res('icons', 'logo_black_64.png')))
-
-        self.label=Label(self.root)
-        self.label.pack()
-
-        self.joystick=Frame(self.root)
-        self.joystick.pack()
-        self.joystick.place(x=20, y=85)
-        self.joystick.configure(bg='#ED5F00')
-
-        pixel = tk.PhotoImage(width=1, height=1)
-
-
-        self.btnL = Button(self.joystick, image=pixel,  width=20, height=20,  command = HardwareButtons.KEY_LEFT_PIN, bg='black')
-        self.btnL.grid(row=1, column=0)
-        self.bindButtonClick(self.btnL)
-
-        self.btnR = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_RIGHT_PIN, bg='black')
-        self.btnR.grid(row=1, column=2)
-        self.bindButtonClick(self.btnR)
-
-        self.btnC = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_PRESS_PIN, bg='#2C2C2C')
-        self.btnC.grid(row=1, column=1)
-        self.bindButtonClick(self.btnC)
-
-        self.btnU = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_UP_PIN, bg='black')
-        self.btnU.grid(row=0, column=1)
-        self.bindButtonClick(self.btnU)
-
-        self.btnD = Button(self.joystick, image=pixel,  width=20, height=20, command = HardwareButtons.KEY_DOWN_PIN, bg='black')
-        self.btnD.grid(row=2, column=1)
-        self.bindButtonClick(self.btnD)
-
-        self.btn1 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY1_PIN, bg='black')
-        self.btn1.place(x=400, y=60)
-        self.bindButtonClick(self.btn1)
-
-        self.btn2 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY2_PIN, bg='black')
-        self.btn2.place(x=400, y=116)
-        self.bindButtonClick(self.btn2)
-
-        self.btn3 = Button(self.root, image=pixel,  width=40, height=20,  command = HardwareButtons.KEY3_PIN, bg='black')
-        self.btn3.place(x=400, y=172)
-        self.bindButtonClick(self.btn3)
-
-        self.set_available_cameras(WebcamVideoStream.list_available_cameras())
-
-        def key_handler(event):
-
-            if(event.keysym=="Up"): GPIO.set_input(HardwareButtons.KEY_UP_PIN, GPIO.HIGH)
-            if(event.keysym=="Down"): GPIO.set_input(HardwareButtons.KEY_DOWN_PIN, GPIO.HIGH)
-            if(event.keysym=="Left"): GPIO.set_input(HardwareButtons.KEY_LEFT_PIN, GPIO.HIGH)
-            if(event.keysym=="Right"): GPIO.set_input(HardwareButtons.KEY_RIGHT_PIN, GPIO.HIGH)
-
-            if(event.keysym in ("1", "KP_1") ): GPIO.set_input(HardwareButtons.KEY1_PIN, GPIO.HIGH)
-            if(event.keysym in ("2", "KP_2") ): GPIO.set_input(HardwareButtons.KEY2_PIN, GPIO.HIGH)
-            if(event.keysym in ("3", "KP_3") ): GPIO.set_input(HardwareButtons.KEY3_PIN, GPIO.HIGH)
-
-            if(event.keysym=="Return"): GPIO.set_input(HardwareButtons.KEY_PRESS_PIN, GPIO.HIGH)
-
-        self.root.bind("<Key>", key_handler)
-
-        # Add a toggle button for the capture window
-        self.capture_window_btn = Button(self.root, text="Toggle Capture Window", command=self.toggle_capture_window)
-        self.capture_window_btn.place(x=10, y=50)
-        self.capture_window_btn.config(width=7, bg='#ED5F00', fg='#FFFFFF')
-
-        # Create the transparent capture window
-        self.capture_window = TransparentCaptureWindow(self.root, Camera.get_instance().monitor)
-
-        self.root.resizable(width = True, height = True)
-        self.root.mainloop()
-
-
-    def bindButtonClick(self, objBtn):
-        objBtn.bind("<Button>", self.buttonDown)
-        objBtn.bind("<ButtonRelease>", self.buttonUp)
-
-    def buttonDown(self, objBtn):
-        gpioID = (objBtn.widget.config('command')[-1])
-        GPIO.set_input(gpioID, GPIO.HIGH)
-
-    def buttonUp(self, objBtn):
-        gpioID = (objBtn.widget.config('command')[-1])
-        GPIO.set_input(gpioID, GPIO.LOW)   
-
-    def setGPIO(self, pin):
-        GPIO.fire_raise_event(pin)
-
-    def ShowImage(self,Image2,Xstart,Ystart):
-        while(self.root==0): sleep(0.1)
-        imwidth, imheight = Image2.size
-        if imwidth != self.width or imheight != self.height:
-            raise ValueError('Image must be same dimensions as display \
-                    ({0}x{1}).' .format(self.width, self.height))
-
-        self.tkimage = ImageTk.PhotoImage(Image2, master=self.root)
-        self.label.configure(image=self.tkimage)
-        self.label.image=self.tkimage
-        self.label.place(x=125, y=10)
-
-    def clear(self):
-        """Clear contents of image buffer"""
+    def update_image(self, pixmap):
+        self.label.setPixmap(pixmap)
+        self.label.move(125, 10)
 
     def toggle_capture_window(self):
         if Camera.get_instance().is_active():
-            self.capture_window.toggle()
+            if self.capture_window:
+                self.capture_window.toggle()
             self.capture_window_visible = not self.capture_window_visible
         else:
             print("Camera is not active. Cannot show capture window.")
 
-    def set_available_cameras(self, camera_list: List[int]):
-        print(camera_list)
+    def set_available_cameras(self, camera_list):
         self.available_cameras = camera_list
         if len(self.available_cameras) > 0:
             self.show_camera_dropdown_list()
 
-    def update_default_camera(self, *args):
-        camera = self.camera_var.get()
+    def update_default_camera(self, camera):
         if camera == VIRTUAL_SCREEN_CAM:
             Camera.get_instance().set_mode(CameraMode.Screen)
-            if self.capture_window_visible:
+            if self.capture_window_visible and self.capture_window:
                 self.capture_window.show()
         else:
             Camera.get_instance().set_mode(CameraMode.WebCam)
             WebcamVideoStream.set_default_camera(int(camera))
-            self.capture_window.hide()
+            if self.capture_window:
+                self.capture_window.hide()
             self.capture_window_visible = False
 
     def show_camera_dropdown_list(self):
-        self.camera_var = tk.StringVar(self.root)
-        self.camera_var.set(self.available_cameras[0])
-        self.camera_dropdown = tk.OptionMenu(self.root, self.camera_var, VIRTUAL_SCREEN_CAM, *self.available_cameras)
-        self.camera_dropdown.config(width=5, bg='#ED5F00', fg='#FFFFFF')
-        self.camera_dropdown.place(x=10, y=10)
-        self.camera_var.trace('w', self.update_default_camera)
+        self.camera_dropdown.clear()
+        self.camera_dropdown.addItem(VIRTUAL_SCREEN_CAM)
+        for camera in self.available_cameras:
+            self.camera_dropdown.addItem(str(camera))
+
+    def keyPressEvent(self, event):
+        key_map = {
+            Qt.Key_Up: HardwareButtons.KEY_UP_PIN,
+            Qt.Key_Down: HardwareButtons.KEY_DOWN_PIN,
+            Qt.Key_Left: HardwareButtons.KEY_LEFT_PIN,
+            Qt.Key_Right: HardwareButtons.KEY_RIGHT_PIN,
+            Qt.Key_1: HardwareButtons.KEY1_PIN,
+            Qt.Key_2: HardwareButtons.KEY2_PIN,
+            Qt.Key_3: HardwareButtons.KEY3_PIN,
+            Qt.Key_Return: HardwareButtons.KEY_PRESS_PIN,
+        }
+        if event.key() in key_map:
+            GPIO.set_input(key_map[event.key()], GPIO.HIGH)
+
+    def keyReleaseEvent(self, event):
+        key_map = {
+            Qt.Key_Up: HardwareButtons.KEY_UP_PIN,
+            Qt.Key_Down: HardwareButtons.KEY_DOWN_PIN,
+            Qt.Key_Left: HardwareButtons.KEY_LEFT_PIN,
+            Qt.Key_Right: HardwareButtons.KEY_RIGHT_PIN,
+            Qt.Key_1: HardwareButtons.KEY1_PIN,
+            Qt.Key_2: HardwareButtons.KEY2_PIN,
+            Qt.Key_3: HardwareButtons.KEY3_PIN,
+            Qt.Key_Return: HardwareButtons.KEY_PRESS_PIN,
+        }
+        if event.key() in key_map:
+            GPIO.set_input(key_map[event.key()], GPIO.LOW)

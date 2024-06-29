@@ -1,87 +1,75 @@
-import tkinter as tk
+from PyQt6.QtWidgets import QWidget, QApplication
+from PyQt6.QtGui import QPainter, QPen
+from PyQt6.QtCore import Qt, QPoint
 
-class TransparentCaptureWindow:
-
+class TransparentCaptureWindow(QWidget):
     def __init__(self, parent, monitor):
-        self.parent = parent
+        super().__init__(parent, Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint)
         self.monitor = monitor
-        self.window = tk.Toplevel(parent)
-        self.window.withdraw()  # Hide window initially
-        self.window.attributes('-alpha', 0.5)  # Set window transparency
-        self.window.overrideredirect(True)  # Remove window decorations
-        self.canvas = tk.Canvas(self.window, highlightthickness=0, bg=None)
-        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.setWindowOpacity(0.5)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
         self.update_geometry()
         
-        self.canvas.bind('<ButtonPress-1>', self.start_move)
-        self.canvas.bind('<ButtonRelease-1>', self.stop_move)
-        self.canvas.bind('<B1-Motion>', self.do_move)
+        self.move_start = QPoint()
         
-        self.window.bind('<KeyPress-Up>', lambda e: self.move(0, -1))
-        self.window.bind('<KeyPress-Down>', lambda e: self.move(0, 1))
-        self.window.bind('<KeyPress-Left>', lambda e: self.move(-1, 0))
-        self.window.bind('<KeyPress-Right>', lambda e: self.move(1, 0))
-        self.window.bind('<KeyPress-plus>', lambda e: self.zoom(1.1))
-        self.window.bind('<KeyPress-minus>', lambda e: self.zoom(0.9))
-        
-        self.move_x = 0
-        self.move_y = 0
-
     def update_geometry(self):
-        self.window.geometry(f'{self.monitor.width}x{self.monitor.height}+{self.monitor.left}+{self.monitor.top}')
-        # self.draw_border()
-
-    def draw_border(self):
-        self.canvas.delete('all')
-        w, h = self.monitor.width, self.monitor.height
-        self.canvas.create_rectangle(0, 0, w, h, outline='red', width=10)
-        self.canvas.create_rectangle(10, 10, w-10, h-10, outline='red', width=1)
-
-    def start_move(self, event):
-        self.move_x = event.x
-        self.move_y = event.y
-
-    def stop_move(self, event):
-        self.move_x = None
-        self.move_y = None
+        self.setGeometry(self.monitor.left, self.monitor.top, self.monitor.width, self.monitor.height)
+        
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setPen(QPen(Qt.GlobalColor.red, 10))
+        painter.drawRect(self.rect())
+        painter.setPen(QPen(Qt.GlobalColor.red, 1))
+        painter.drawRect(10, 10, self.width() - 20, self.height() - 20)
+        
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.move_start = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            self.move(event.globalPosition().toPoint() - self.move_start)
+            
+    def mouseReleaseEvent(self, event):
         self.update_monitor()
-
-    def do_move(self, event):
-        deltax = event.x - self.move_x
-        deltay = event.y - self.move_y
-        x = self.window.winfo_x() + deltax
-        y = self.window.winfo_y() + deltay
-        self.window.geometry(f'+{x}+{y}')
-
-    def move(self, dx, dy):
-        x = self.window.winfo_x() + dx
-        y = self.window.winfo_y() + dy
-        self.window.geometry(f'+{x}+{y}')
+        
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Up:
+            self.move(self.x(), self.y() - 1)
+        elif event.key() == Qt.Key.Key_Down:
+            self.move(self.x(), self.y() + 1)
+        elif event.key() == Qt.Key.Key_Left:
+            self.move(self.x() - 1, self.y())
+        elif event.key() == Qt.Key.Key_Right:
+            self.move(self.x() + 1, self.y())
+        elif event.key() == Qt.Key.Key_Plus:
+            self.zoom(1.1)
+        elif event.key() == Qt.Key.Key_Minus:
+            self.zoom(0.9)
         self.update_monitor()
-
+        
     def zoom(self, factor):
-        w = int(self.monitor.width * factor)
-        h = int(self.monitor.height * factor)
-        self.monitor.width = w
-        self.monitor.height = h
-        self.update_geometry()
-        self.update_monitor()
-
+        new_width = int(self.width() * factor)
+        new_height = int(self.height() * factor)
+        self.resize(new_width, new_height)
+        self.monitor.width = new_width
+        self.monitor.height = new_height
+        
     def update_monitor(self):
-        self.monitor.left = self.window.winfo_x()
-        self.monitor.top = self.window.winfo_y()
-        self.monitor.width = self.window.winfo_width()
-        self.monitor.height = self.window.winfo_height()
-
+        self.monitor.left = self.x()
+        self.monitor.top = self.y()
+        self.monitor.width = self.width()
+        self.monitor.height = self.height()
+        
     def show(self):
-        self.window.deiconify()
-
+        super().show()
+        
     def hide(self):
-        self.window.withdraw()
-
+        super().hide()
+        
     def toggle(self):
-        if self.window.state() == 'withdrawn':
-            self.show()
-        else:
+        if self.isVisible():
             self.hide()
+        else:
+            self.show()

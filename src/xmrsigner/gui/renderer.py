@@ -3,7 +3,7 @@ from threading import Lock
 
 from xmrsigner.gui.components import Fonts, GUIConstants
 #from xmrsigner.hardware.ST7789 import ST7789
-from xmrsigner.emulator.desktopDisplay import desktopDisplay
+from xmrsigner.emulator.desktopDisplay import DesktopDisplay
 from xmrsigner.models.singleton import ConfigurableSingleton
 
 
@@ -26,7 +26,7 @@ class Renderer(ConfigurableSingleton):
 
         # Eventually we'll be able to plug in other display controllers
         #renderer.disp = ST7789()
-        renderer.disp = desktopDisplay()
+        renderer.disp = DesktopDisplay()
         renderer.canvas_width = renderer.disp.width
         renderer.canvas_height = renderer.disp.height
 
