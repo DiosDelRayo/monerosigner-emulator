@@ -24,7 +24,8 @@ install:
 	@sudo apt install libzbar0
 	@pip install --upgrade -r requirements.txt
 
-run: clean
+run:
+	@$(MAKE) clean || true
 	@cd emulator; python -m xmrsigner
 
 turn:
