@@ -24,8 +24,7 @@ install:
 	@sudo apt install libzbar0
 	@pip install --upgrade -r requirements.txt
 
-run:
-	@$(MAKE) clean || true
+run: clean
 	@cd emulator; python -m xmrsigner
 
 turn:
@@ -42,10 +41,10 @@ executable:
 	@pyinstaller --onefile -n xmrsigner-${VERSION} --add-data "${BUILD_DIR}/xmrsigner/resources:xmrsigner/resources" --collect-all xmrsigner --collect-data "xmrsigner:xmrsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk -p ${BUILD_DIR} ${BUILD_DIR}/xmrsigner/__main__.py
 
 clean:
-	@find src -type d -name __pycache__ -exec rm -rf \{\} \;
-	@find emulator -type d -name __pycache__ -exec rm -rf \{\} \;
-	@rm -rf MoneroSigner
-	@rm -rf xmrsigner*.spec
+	@find src -type d -name __pycache__ -exec rm -rf \{\} \; || true
+	@find emulator -type d -name __pycache__ -exec rm -rf \{\} \; || true
+	@rm -rf MoneroSigner || true
+	@rm -rf xmrsigner*.spec || true
 
 docker-image:
 	@mkdir -p MoneroSigner
