@@ -1,4 +1,5 @@
 import tkinter as tk
+from xmrsigner.emulator.screencapture import Monitor
 
 class TransparentCaptureWindow:
 
@@ -69,10 +70,12 @@ class TransparentCaptureWindow:
         self.update_monitor()
 
     def update_monitor(self):
-        self.monitor.left = self.window.winfo_x()
-        self.monitor.top = self.window.winfo_y()
-        self.monitor.width = self.window.winfo_width()
-        self.monitor.height = self.window.winfo_height()
+        # self.monitor.left = self.window.winfo_x()
+        # self.monitor.top = self.window.winfo_y()
+        # self.monitor.width = self.window.winfo_width()
+        # self.monitor.height = self.window.winfo_height()
+        print(self.monitor)
+        self.monitor.move_to_xy(self.window.winfo_x(), self.window.winfo_y())
 
     def show(self):
         self.window.deiconify()

@@ -26,8 +26,8 @@ class Camera(Singleton):
         # This is the only way to access the one and only Controller
         if cls._instance is None:
             cls._instance = cls.__new__(cls)
-        cls._instance._camera_rotation = int(Settings.get_instance().get_value(SettingsConstants.SETTING__CAMERA_ROTATION))
-        cls._instance._monitor = Monitor(width=512, height=384)
+            cls._instance._monitor = Monitor(width=512, height=384)
+            cls._instance._camera_rotation = int(Settings.get_instance().get_value(SettingsConstants.SETTING__CAMERA_ROTATION))
         return cls._instance
 
 
@@ -37,10 +37,14 @@ class Camera(Singleton):
 
         if self._current_mode == CameraMode.WebCam:
             self._video_stream = WebcamVideoStream(resolution=resolution, framerate=framerate, format=format)
+            self._camera_rotation = int(Settings.get_instance().get_value(SettingsConstants.SETTING__CAMERA_ROTATION))
             self._video_stream.start()
         elif self._current_mode == CameraMode.Screen:
-            self._monitor = self._monitor
-            self._screen_capture = ScreenCapture(monitor=self._monitor, framerate=framerate)
+            self._monitor.width = resolution[0]
+            self._monitor.height = resolution[1]
+            self._screen_capture = ScreenCapture(monitor=self._monitor)
+            self._camera_rotation = 270
+            self._screen_capture.framerate = framerate
             self._screen_capture.start()
         else:
             raise ValueError("Invalid mode. Choose 'webcam' or 'screen'.")
@@ -82,16 +86,14 @@ class Camera(Singleton):
         if self._picamera is not None:
             self._picamera.close()
 
-
     def capture_frame(self):
         if self._current_mode == CameraMode.WebCam:
             frame = WebcamVideoStream.single_frame()
         elif self._current_mode == CameraMode.Screen:
-            frame = ScreenCapture.single_frame(self._monitor)
+            frame = ScreenCapture.single_frame()
         else:
             raise Exception('Invalid mode.')
         return Image.fromarray(frame).rotate(90 + self._camera_rotation)
-
 
     def stop_single_frame_mode(self):
         if self._picamera is not None:

@@ -1,10 +1,11 @@
 from numpy import array as np_array
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from cv2 import cvtColor, COLOR_RGBA2RGB
 import pyscreenshot as ImageGrab
 from threading import Thread
 from time import sleep
 from typing import Dict, Tuple, Optional
+from random import randint
 
 from .streamdevice import StreamInputDevice
 
@@ -12,6 +13,7 @@ from .streamdevice import StreamInputDevice
 @dataclass
 class Monitor:
 
+    id: int = field(default=None, init=False)
     top: int = 0
     left: int = 0
     width: int = 320
@@ -19,6 +21,10 @@ class Monitor:
     zoom: float = 1.0
     screen_width: int = 1920
     screen_height: int = 1080
+
+    def __post_init__(self):
+        if self.id is None:
+            self.id = randint(1, 1000)
 
     def set_screen_resolution(self, width, height) -> None:
         self.screen_width = width
@@ -126,8 +132,8 @@ class Monitor:
 
 class ScreenCapture(StreamInputDevice):
 
-    def __init__(self, monitor: Optional[Monitor] = None, framerate=30):
-        self.monitor = monitor or Monitor()
+    def __init__(self, monitor: Monitor, framerate=30):
+        self.monitor = monitor
         self.framerate = framerate
         self.frame = None
         self.should_stop = False
@@ -153,6 +159,7 @@ class ScreenCapture(StreamInputDevice):
         self.should_stop = False
 
     def read(self):
+        print(self.monitor)
         return self.frame
 
     def stop(self) -> None:

@@ -156,7 +156,7 @@ class desktopDisplay(threading.Thread):
         self.root.bind("<Key>", key_handler)
 
         # Add a toggle button for the capture window
-        self.capture_window_btn = Button(self.root, text="Toggle Capture Window", command=self.toggle_capture_window)
+        self.capture_window_btn = Button(self.root, text="Area", command=self.toggle_capture_window)
         self.capture_window_btn.place(x=10, y=50)
         self.capture_window_btn.config(width=7, bg='#ED5F00', fg='#FFFFFF')
 
