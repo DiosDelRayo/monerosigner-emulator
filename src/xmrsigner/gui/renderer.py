@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 from threading import Lock
+from typing import Optional
 
 from xmrsigner.gui.components import Fonts, GUIConstants
 #from xmrsigner.hardware.ST7789 import ST7789
@@ -10,12 +11,12 @@ from xmrsigner.models.singleton import ConfigurableSingleton
 
 class Renderer(ConfigurableSingleton):
     buttons = None
-    canvas_width = 0
-    canvas_height = 0
+    canvas_width: int = 0
+    canvas_height: int = 0
     canvas: Image.Image = None
     draw: ImageDraw.ImageDraw = None
-    disp = None
-    lock = Lock()
+    disp: desktopDisplay = None
+    lock: Lock = Lock()
 
 
     @classmethod
@@ -34,7 +35,12 @@ class Renderer(ConfigurableSingleton):
         renderer.draw = ImageDraw.Draw(renderer.canvas)
 
 
-    def show_image(self, image=None, alpha_overlay=None, show_direct=False):
+    def show_image(
+            self,
+            image: Optional[Image] = None,
+            alpha_overlay: Optional[Image] = None,
+            show_direct: bool = False
+        ):
         if show_direct:
             # Use the incoming image as the canvas and immediately render
             self.disp.ShowImage(image, 0, 0)
@@ -52,7 +58,16 @@ class Renderer(ConfigurableSingleton):
         self.disp.ShowImage(self.canvas, 0, 0)
 
 
-    def show_image_pan(self, image, start_x, start_y, end_x, end_y, rate, alpha_overlay=None):
+    def show_image_pan(
+            self,
+            image: Image,
+            start_x: int,
+            start_y: int,
+            end_x: int,
+            end_y: int,
+            rate: int,
+            alpha_overlay: Optional[Image] = None
+        ):
         cur_x = start_x
         cur_y = start_y
         rate_x = rate

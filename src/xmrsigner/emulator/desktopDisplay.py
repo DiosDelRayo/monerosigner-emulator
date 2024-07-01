@@ -2,7 +2,7 @@
 #  Work based on:
 #  Seedsigner desktop display driver and button emulator
 #  by: @EnteroPositivo (Twitter, Gmail, GitHub)
-from time import sleep
+from time import sleep, time
 
 from .webcamvideostream import WebcamVideoStream
 from xmrsigner.emulator.virtualGPIO import GPIO
@@ -10,13 +10,14 @@ from xmrsigner.hardware.buttons import HardwareButtons
 from xmrsigner.resources import get as res
 from xmrsigner.hardware.camera import Camera, CameraMode
 from .capturewindow import TransparentCaptureWindow
+from .recorder import ScreenRecorder
 
 from tkinter import *
 import tkinter as tk
 # from tkinter import ttk
 
 
-from PIL import ImageTk
+from PIL import Image, ImageTk
 
 import threading
 import os
@@ -31,11 +32,15 @@ VIRTUAL_SCREEN_CAM = 'vScreen'
 
 class desktopDisplay(threading.Thread):
     """class for desktop display."""
+
     root=0
+    recording: bool = False
+
     def __init__(self):
         self.width = 240
         self.height = 240
         self.available_cameras: List[int] = [] 
+        self.recorder: ScreenRecorder = ScreenRecorder('xmrsigner-{{ timestamp }}.gif')
 
         # Multithreading
         threading.Thread.__init__(self)
@@ -155,6 +160,10 @@ class desktopDisplay(threading.Thread):
 
         self.root.bind("<Key>", key_handler)
 
+        self.btnRecord = Button(self.root, text="○", command=self.record_toggle, bg='#ED5F00', fg='#FFFFFF')
+        self.btnRecord.place(x=10, y=210)
+
+
         # Add a toggle button for the capture window
         self.capture_window_btn = Button(self.root, text="Area", command=self.toggle_capture_window)
         self.capture_window_btn.place(x=10, y=50)
@@ -182,12 +191,13 @@ class desktopDisplay(threading.Thread):
     def setGPIO(self, pin):
         GPIO.fire_raise_event(pin)
 
-    def ShowImage(self,Image2,Xstart,Ystart):
+    def ShowImage(self, Image2, Xstart, Ystart) -> None:
         while(self.root==0): sleep(0.1)
         imwidth, imheight = Image2.size
         if imwidth != self.width or imheight != self.height:
             raise ValueError('Image must be same dimensions as display \
                     ({0}x{1}).' .format(self.width, self.height))
+        self.recorder.record_frame(Image2)
 
         self.tkimage = ImageTk.PhotoImage(Image2, master=self.root)
         self.label.configure(image=self.tkimage)
@@ -229,3 +239,11 @@ class desktopDisplay(threading.Thread):
         self.camera_dropdown.config(width=5, bg='#ED5F00', fg='#FFFFFF')
         self.camera_dropdown.place(x=10, y=10)
         self.camera_var.trace('w', self.update_default_camera)
+
+    def record_toggle(self):
+        if self.recorder.recording:
+            self.recorder.stop()
+            self.btnRecord.config(text="○")  # Change caption to circle
+        else:
+            self.recorder.record()
+            self.btnRecord.config(text="■")  # Change caption to square

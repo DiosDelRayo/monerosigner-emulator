@@ -11,3 +11,4 @@ urtypes @ git+https://github.com/selfcustody/urtypes.git@7fb280eab3b3563dfc57d27
 monero @ git+https://github.com/DiosDelRayo/monero-python.git#egg=monero
 polyseed @ git+https://github.com/DiosDelRayo/polyseed-python.git#egg=polyseed
 pyscreenshot==3.1
+psutil==6.0.0
