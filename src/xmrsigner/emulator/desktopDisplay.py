@@ -26,7 +26,7 @@ from sys import exit
 from typing import List
 
 
-EMULATOR_VERSION = '0.4.5'
+EMULATOR_VERSION = '0.4.6'
 VIRTUAL_SCREEN_CAM = 'vScreen'
 
 
