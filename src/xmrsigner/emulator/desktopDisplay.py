@@ -23,11 +23,33 @@ import threading
 import os
 from typing import Optional
 from sys import exit
-from typing import List
+from typing import List, Union
+import yaml
 
-
-EMULATOR_VERSION = '0.4.7'
+EMULATOR_VERSION = '0.6.0'
 VIRTUAL_SCREEN_CAM = 'vScreen'
+CONFIG_FILE = 'xmrsigner-emulator.yml'
+
+
+def store(key: str, value: Union[None, str, bool, int]) -> None:
+    try:
+        with open(CONFIG_FILE, 'r') as file:
+            data = yaml.safe_load(file)
+    except FileNotFoundError:
+        data = {}
+
+    data[key] = value
+
+    with open(CONFIG_FILE, 'w') as file:
+        yaml.dump(data, file)
+
+def load(key: str, default: Union[None, str, bool, int] = None) -> Union[None, str, bool, int]:
+    try:
+        with open('xmrsigner-emulator.yml', 'r') as file:
+            data = yaml.safe_load(file)
+            return data.get(key)
+    except (FileNotFoundError, KeyError):
+        return default
 
 
 class desktopDisplay(threading.Thread):
@@ -46,26 +68,6 @@ class desktopDisplay(threading.Thread):
         threading.Thread.__init__(self)
         self.start()
 
-        from xmrsigner.models.threads import BaseThread
-        from xmrsigner.gui.screens.screen import PowerOffScreen
-        from xmrsigner.views import view
-        class PowerOffView(view.View):
-            def run(self):
-                thread = PowerOffView.PowerOffThread()
-                thread.start()
-                PowerOffScreen().display()
-
-
-            class PowerOffThread(BaseThread):
-                def run(self):
-                    from subprocess import call
-                    while self.keep_running:
-                        sleep(10)
-                        call("kill $(ps aux | grep '[p]ython.*main.py' | awk '{print $2}')", shell=True)
-
-
-        # patch power off, to not power off the machine
-        view.PowerOffView = PowerOffView
         self.capture_window = None
         self.capture_window_visible = False
 
@@ -73,8 +75,12 @@ class desktopDisplay(threading.Thread):
         self.root.quit()
         self.root.destroy()
         # terminate the main thread forcefully
+        from xmrsigner.controller import Controller
+        Controller.shutdown()
         pid = os.getpid()
-        os.kill(pid,9)
+        os.kill(pid, 15)  # invite to terminate
+        sleep(15)
+        os.kill(pid, 9)  # kill
 
     def run(self):
         """run thread"""    
@@ -144,6 +150,8 @@ class desktopDisplay(threading.Thread):
         self.bindButtonClick(self.btn3)
 
         self.set_available_cameras(WebcamVideoStream.list_available_cameras())
+        if (defaultCam := load('defaultCam')):
+            self.camera_var.set(load('defaultCam', self.available_cameras[0]))  # TkInter is so a clusterfuck!!!
 
         def key_handler(event):
 
@@ -222,6 +230,10 @@ class desktopDisplay(threading.Thread):
 
     def update_default_camera(self, *args):
         camera = self.camera_var.get()
+        store('defaultCam', camera)
+        self.set_camera(camera)
+
+    def set_camera(self, camera: int) -> None:
         if camera == VIRTUAL_SCREEN_CAM:
             Camera.get_instance().set_mode(CameraMode.Screen)
             if self.capture_window_visible:
