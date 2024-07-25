@@ -30,12 +30,13 @@ run: clean
 turn:
 	@$(MAKE) load && $(MAKE) run ; $(MAKE) unload
 
-executable:
+executable: clean
+	@$(MAKE) -C ${MONERO_SIGNER_DIR} clean
 	@pip install -U pyinstaller
 	@mkdir -p ${DIST_DIR}
 	@mkdir -p ${BUILD_DIR}
-	@rm -rf ${BUILD_DIR}/*
-	@rm -rf ${DIST_DIR}/*
+	@rm -rf ${BUILD_DIR}/* || true
+	# @rm -rf ${DIST_DIR}/* || true  # TODO: WTF?
 	@cp -ar ${MONERO_SIGNER_DIR}/src/* build/
 	@cp -ar ${EMULATOR_DIR}/src/* build/
 	@pyinstaller --onefile -n xmrsigner-${VERSION} --add-data "${BUILD_DIR}/xmrsigner/resources:xmrsigner/resources" --collect-all xmrsigner --collect-data "xmrsigner:xmrsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk -p ${BUILD_DIR} ${BUILD_DIR}/xmrsigner/__main__.py
