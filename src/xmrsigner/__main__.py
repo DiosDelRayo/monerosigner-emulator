@@ -1,5 +1,5 @@
 from xmrsigner.helpers import wallet as wallet_controller
-wallet_controller.WALLET_DAEMON_PATH = '/home/thor/monero-gui-v0.18.3.3/extras/monero-wallet-rpc'
+wallet_controller.WALLET_DAEMON_PATH = '/projects/monerosigner/monerosigner-emulator/static-monero-wallet-rpc'
 wallet_controller.PIDFILE_BASE_PATH = '/tmp/monero-wallet-rpc'
 
 from xmrsigner.models.settings import Settings
@@ -10,5 +10,6 @@ settings.set_value(SettingsConstants.SETTING__CAMERA_ROTATION, SettingsConstants
 
 
 from xmrsigner.controller import Controller
+Controller.IS_EMULATOR = True
 # Get the one and only Controller instance and start our main loop
 Controller.get_instance().start()
