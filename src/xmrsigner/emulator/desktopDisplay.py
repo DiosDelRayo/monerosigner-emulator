@@ -26,7 +26,7 @@ from sys import exit
 from typing import List, Union
 import yaml
 
-EMULATOR_VERSION = '0.6.0'
+EMULATOR_VERSION = '0.7.0'
 VIRTUAL_SCREEN_CAM = 'vScreen'
 CONFIG_FILE = 'xmrsigner-emulator.yml'
 
