@@ -39,7 +39,17 @@ executable: clean
 	# @rm -rf ${DIST_DIR}/* || true  # TODO: WTF?
 	@cp -ar ${MONERO_SIGNER_DIR}/src/* build/
 	@cp -ar ${EMULATOR_DIR}/src/* build/
-	@pyinstaller --onefile -n xmrsigner-${VERSION} --add-data "${BUILD_DIR}/xmrsigner/resources:xmrsigner/resources" --collect-all xmrsigner --collect-data "xmrsigner:xmrsigner" --hidden-import PIL._tkinter_finder --collect-submodules PIL --collect-submodules PIL.ImageTk -p ${BUILD_DIR} ${BUILD_DIR}/xmrsigner/__main__.py
+	@pyinstaller \
+		--onefile\
+		-n xmrsigner-${VERSION}\
+		--add-data "${BUILD_DIR}/xmrsigner/resources:xmrsigner/resources"\
+		--add-binary "${BUILD_DIR}/../monero-wallet-rpc:."\
+		--collect-all xmrsigner\
+		--collect-data "xmrsigner:xmrsigner"\
+		--hidden-import PIL._tkinter_finder\
+		--collect-submodules PIL\
+		--collect-submodules PIL.ImageTk\
+		-p ${BUILD_DIR} ${BUILD_DIR}/xmrsigner/__main__.py
 
 clean:
 	@find src -type d -name __pycache__ -exec rm -rf \{\} \; || true
