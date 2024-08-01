@@ -26,7 +26,7 @@ from typing import List, Union
 from os import path
 import yaml
 
-EMULATOR_VERSION = '0.7.1'
+EMULATOR_VERSION = '0.7.2'
 VIRTUAL_SCREEN_CAM = 'vScreen'
 CONFIG_FILE = 'xmrsigner-emulator.yml'
 SCREENSHOT_PATH = path.dirname(path.abspath(__file__))
