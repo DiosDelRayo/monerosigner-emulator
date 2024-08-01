@@ -14,7 +14,6 @@ from .recorder import ScreenRecorder
 
 from tkinter import *
 import tkinter as tk
-# from tkinter import ttk
 
 
 from PIL import Image, ImageTk
@@ -24,11 +23,13 @@ import os
 from typing import Optional
 from sys import exit
 from typing import List, Union
+from os import path
 import yaml
 
-EMULATOR_VERSION = '0.7.0'
+EMULATOR_VERSION = '0.7.1'
 VIRTUAL_SCREEN_CAM = 'vScreen'
 CONFIG_FILE = 'xmrsigner-emulator.yml'
+SCREENSHOT_PATH = path.dirname(path.abspath(__file__))
 
 
 def store(key: str, value: Union[None, str, bool, int]) -> None:
@@ -45,7 +46,7 @@ def store(key: str, value: Union[None, str, bool, int]) -> None:
 
 def load(key: str, default: Union[None, str, bool, int] = None) -> Union[None, str, bool, int]:
     try:
-        with open('xmrsigner-emulator.yml', 'r') as file:
+        with open(CONFIG_FILE, 'r') as file:
             data = yaml.safe_load(file)
             return data.get(key)
     except (FileNotFoundError, KeyError):
@@ -62,7 +63,7 @@ class desktopDisplay(threading.Thread):
         self.width = 240
         self.height = 240
         self.available_cameras: List[int] = [] 
-        self.recorder: ScreenRecorder = ScreenRecorder('xmrsigner-{{ timestamp }}.gif')
+        self.recorder: ScreenRecorder = ScreenRecorder(path.join(SCREENSHOT_PATH, 'xmrsigner-{{ timestamp }}.gif'))
 
         # Multithreading
         threading.Thread.__init__(self)
