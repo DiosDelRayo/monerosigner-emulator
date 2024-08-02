@@ -242,8 +242,9 @@ class desktopDisplay(threading.Thread):
         else:
             Camera.get_instance().set_mode(CameraMode.WebCam)
             WebcamVideoStream.set_default_camera(int(camera))
-            self.capture_window.hide()
-            self.capture_window_visible = False
+            if self.capture_window:
+                self.capture_window.hide()
+                self.capture_window_visible = False
 
     def show_camera_dropdown_list(self):
         self.camera_var = tk.StringVar(self.root)
